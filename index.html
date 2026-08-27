@@ -3943,7 +3943,11 @@ function guardarConfigSupaPerfil() {
   localStorage.setItem('sn_supa_table', table);
   SUPA_URL = url; SUPA_KEY = key; SUPA_TABLE = table;
   try {
-    _supa = window.supabase ? window.supabase.createClient(url, key) : null;
+    if (window.supabase) {
+      _supa = window.supabase.createClient(url, key, {
+        auth: { persistSession: true, storageKey: 'sn-auth' }
+      });
+    }
   } catch(e) { alert('Error al conectar: ' + e.message); return; }
   showToast('✓ Guardado — ' + url.split('//')[1].split('.')[0] + '.supabase.co');
   actualizarStatusSupa();
@@ -4048,8 +4052,17 @@ var _supa = null;
 var _supaUser = null;
 
 function initSupabase() {
-  if (!SUPA_URL || !SUPA_KEY) return; // not configured yet
-  _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+  var url = (localStorage.getItem('sn_supa_url') || SUPA_URL || '').trim().replace(/\/+$/, '');
+  var key = (localStorage.getItem('sn_supa_key') || SUPA_KEY || '').trim();
+  var table = localStorage.getItem('sn_supa_table') || 'userdata';
+  if (!url || !key || !url.startsWith('https://')) return;
+  if (_supa) return; // already initialized — don't create again
+  SUPA_URL = url; SUPA_KEY = key; SUPA_TABLE = table;
+  if (window.supabase) {
+    _supa = window.supabase.createClient(url, key, {
+      auth: { persistSession: true, storageKey: 'sn-auth' }
+    });
+  }
   checkSession();
 }
 
@@ -4107,16 +4120,19 @@ function getAuthFields() {
 }
 
 function getSupaClient() {
-  var url = (localStorage.getItem('sn_supa_url') || SUPA_URL || '').trim().replace(/\/$/, '');
+  var url = (localStorage.getItem('sn_supa_url') || SUPA_URL || '').trim().replace(/\/+$/, '');
   var key = (localStorage.getItem('sn_supa_key') || SUPA_KEY || '').trim();
   if (!url || !key) return null;
-  if (!url.startsWith('http')) { showAuthError('URL inválida. Debe empezar con https://'); return null; }
-  // Only create client once — reuse if URL hasn't changed
-  if (!_supa || SUPA_URL !== url) {
-    SUPA_URL = url; SUPA_KEY = key;
-    var savedTable = localStorage.getItem('sn_supa_table');
-    if (savedTable) SUPA_TABLE = savedTable;
-    if (window.supabase) _supa = window.supabase.createClient(url, key);
+  if (!url.startsWith('https://')) { showAuthError('URL inválida. Debe empezar con https://'); return null; }
+  // Reuse existing client if URL matches
+  if (_supa && SUPA_URL === url) return _supa;
+  SUPA_URL = url; SUPA_KEY = key;
+  var savedTable = localStorage.getItem('sn_supa_table');
+  if (savedTable) SUPA_TABLE = savedTable;
+  if (window.supabase) {
+    _supa = window.supabase.createClient(url, key, {
+      auth: { persistSession: true, storageKey: 'sn-auth' }
+    });
   }
   return _supa;
 }
