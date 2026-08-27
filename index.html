@@ -1419,23 +1419,77 @@ function esc(s) {
 var curMat = null;
 var screenOrder = ['home','resolver','foto','materias','historial','calendario','flashcards','apuntes','asistente','examen','planificador','ejercicios','tp','resumen','comparador','mapa','genfc','calculadora','progreso','perfil'];
 function nav(s) {
+  // Show correct screen
   document.querySelectorAll('.scr').forEach(function(x) { x.classList.remove('act'); });
   var el = document.getElementById('s-' + s);
   if (el) el.classList.add('act');
   document.querySelectorAll('.si').forEach(function(i) { i.classList.remove('act'); });
-  var idx = screenOrder.indexOf(s);
-  var items = document.querySelectorAll('.si');
-  if (idx !== -1 && items[idx]) items[idx].classList.add('act');
-  if (s === 'flashcards') { renderMazos(); }
-  if (s === 'apuntes') renderAp();
-  if (s === 'historial') renderH('all');
-  if (s === 'home') { renderHomeRec(); renderHomeProg(); renderHomeReco(); }
-  if (s === 'calculadora') initCalc();
-  if (s === 'progreso') renderProg();
-  if (s === 'genfc') { var gm = document.getElementById('gf-maz'); if (gm) gm.innerHTML = DB.mazos.map(function(m) { return '<option value="' + m.id + '">' + esc(m.nombre) + '</option>'; }).join(''); }
-  if (s === 'calendario') renderCal();
-  if (s === 'materias') renderMateriasGrid();
-  if (s === 'perfil') loadProfile();
+
+  // Save chat if leaving asistente
+  if (s !== 'asistente' && chatHist && chatHist.length >= 2) {
+    try { guardarSesionChat(); } catch(e) {}
+  }
+
+  // Auto-expand sidebar section
+  var _secMap2 = {
+    estudio: ['flashcards','apuntes','examen','examen-sim','revision-examen','planificador','historial','calendario'],
+    herr: ['ejercicios','genfc','resumen','transformador','glosario','mapa','comparador','tp','rubrica','consigna','otra-manera','inversa','ejemplos','programa','calculadora'],
+    prog: ['progreso','estadisticas','metas','habitos','notificaciones','favoritos','perfil']
+  };
+  Object.keys(_secMap2).forEach(function(sec) {
+    if (_secMap2[sec].indexOf(s) !== -1 && _sbState && !_sbState[sec]) {
+      _sbState[sec] = true;
+      var sbEl = document.getElementById('sb-' + sec);
+      var sbIco = document.getElementById('sb-' + sec + '-ico');
+      if (sbEl) sbEl.style.display = 'block';
+      if (sbIco) sbIco.textContent = '▾';
+    }
+  });
+
+  // Screen-specific init
+  if (s === 'home') { try { renderHomeRec(); renderHomeProg(); renderHomeReco(); renderHomeBanner(); } catch(e) {} }
+  if (s === 'flashcards') { try { renderMazos(); renderMazosStats(); } catch(e) {} }
+  if (s === 'apuntes') { try { renderAp(); } catch(e) {} }
+  if (s === 'historial') { try { renderH('all'); } catch(e) {} }
+  if (s === 'calculadora') { try { initCalc(); } catch(e) {} }
+  if (s === 'progreso') { try { renderProg(); } catch(e) {} }
+  if (s === 'estadisticas') { try { renderStats(); } catch(e) {} }
+  if (s === 'metas') { try { renderMetas(); } catch(e) {} }
+  if (s === 'habitos') { try { renderHabitos(); initTimerMats(); } catch(e) {} }
+  if (s === 'notificaciones') { try { generarNotifs(); } catch(e) {} }
+  if (s === 'favoritos') { try { renderFavoritos(); } catch(e) {} }
+  if (s === 'genfc') { try { var gm = document.getElementById('gf-maz'); if (gm) gm.innerHTML = DB.mazos.map(function(m) { return '<option value="' + m.id + '">' + esc(m.nombre) + '</option>'; }).join(''); } catch(e) {} }
+  if (s === 'calendario') { try { renderCal(); } catch(e) {} }
+  if (s === 'materias') { try { renderMateriasGrid(); renderMatRecientes(); setTimeout(function(){ var inp=document.getElementById('mat-search-global'); if(inp)inp.focus(); },150); } catch(e) {} }
+  if (s === 'perfil') { try { loadProfile(); actualizarStatusSupa(); } catch(e) {} }
+  if (s === 'desafio') { try { if(!DB.desafioHoy || DB.desafioHoy.fecha!==new Date().toDateString()) generarDesafio(); else renderDesafio(); } catch(e) {} }
+  if (s === 'revision-examen') { try { initRevExamen(); } catch(e) {} }
+  if (s === 'glosario') { try { renderGlosariosGuardados(); } catch(e) {} }
+  if (s === 'examen-sim') { try { renderSimHistorial(); } catch(e) {} }
+  if (s === 'materia') { try { setTimeout(function(){ var inp=document.getElementById('mat-in'); if(inp){inp.value='';inp.focus();} },120); } catch(e) {} }
+  if (s === 'asistente') { try { renderChatSesiones(); } catch(e) {} }
+  if (s === 'sesion-rapida') { /* user picks time */ }
+  if (s === 'otra-manera') { /* user picks mode */ }
+  if (s === 'transformador') { /* user inputs content */ }
+  if (s === 'rubrica') { /* user inputs text */ }
+  if (s === 'inversa') { /* user inputs explanation */ }
+  if (s === 'ejemplos') { /* user inputs concept */ }
+  if (s === 'programa') { /* user inputs program */ }
+  if (s === 'consigna') { /* user inputs consigna */ }
+
+  // Tips
+  var _tips = {
+    'flashcards': 'Podés crear mazos desde Generar FC o desde cualquier resumen.',
+    'examen-sim': 'Los simulacros quedan guardados para comparar tu progreso.',
+    'sesion-rapida': 'La sesión rápida analiza tu historial para elegir qué practicar.',
+    'inversa': 'Explicar con tus palabras es una de las técnicas más efectivas.',
+    'habitos': 'El Pomodoro registra el tiempo y lo suma a las estadísticas.',
+  };
+  if (_tips[s]) try { showTip(s, _tips[s]); } catch(e) {}
+
+  // Banner on home
+  if (s === 'home') try { setTimeout(renderHomeBanner, 60); } catch(e) {}
+
   updateStats();
 }
 
@@ -2282,23 +2336,6 @@ function doSearch(){
 // ================================================================
 // NAV EXTENSION — register new screens
 // ================================================================
-var _navOrig = nav;
-nav = function(s) {
-  var extras = ['estadisticas','metas','habitos','notificaciones','favoritos','ejemplos','rubrica','consigna','inversa'];
-  if (extras.indexOf(s) !== -1) {
-    document.querySelectorAll('.scr').forEach(function(x) { x.classList.remove('act'); });
-    var el = document.getElementById('s-' + s);
-    if (el) el.classList.add('act');
-    document.querySelectorAll('.si').forEach(function(i) { i.classList.remove('act'); });
-    if (s === 'estadisticas') setTimeout(renderStats, 50);
-    if (s === 'metas') setTimeout(renderMetas, 50);
-    if (s === 'habitos') setTimeout(renderHabitos, 50);
-    if (s === 'notificaciones') setTimeout(generarNotifs, 50);
-    if (s === 'favoritos') setTimeout(renderFavoritos, 50);
-    return;
-  }
-  _navOrig(s);
-};
 
 // ================================================================
 // ESTADÍSTICAS AVANZADAS
@@ -2668,21 +2705,6 @@ async function analizarInversa() {
 // ================================================================
 // NAV EXTENSION 2
 // ================================================================
-var _navOrig2 = nav;
-nav = function(s) {
-  var extras2 = ['sesion-rapida','desafio','revision-examen','transformador','glosario','examen-sim','otra-manera','programa'];
-  if (extras2.indexOf(s) !== -1) {
-    document.querySelectorAll('.scr').forEach(function(x){x.classList.remove('act');});
-    var el = document.getElementById('s-'+s); if (el) el.classList.add('act');
-    document.querySelectorAll('.si').forEach(function(i){i.classList.remove('act');});
-    if (s==='revision-examen') setTimeout(initRevExamen, 50);
-    if (s==='desafio') setTimeout(function(){if(!DB.desafioHoy)generarDesafio();else renderDesafio();},50);
-    if (s==='glosario') setTimeout(renderGlosariosGuardados, 50);
-    if (s==='examen-sim') setTimeout(renderSimHistorial, 50);
-    return;
-  }
-  _navOrig2(s);
-};
 
 // ================================================================
 // MOTOR DE RECOMENDACIONES
@@ -3364,13 +3386,6 @@ renderProg = function() {
 // ================================================================
 // PATCH NAV HOME — add banner
 // ================================================================
-var _navForBanner = nav;
-nav = function(s) {
-  _navForBanner(s);
-  if (s === 'home') {
-    setTimeout(renderHomeBanner, 60);
-  }
-};
 
 
 // ================================================================
@@ -3420,13 +3435,6 @@ function cargarSesionChat(id) {
 }
 
 // Patch nav to save chat on leave
-var _navSaveChat = nav;
-nav = function(s) {
-  if (s !== 'asistente' && chatHist && chatHist.length >= 2) {
-    guardarSesionChat();
-  }
-  _navSaveChat(s);
-};
 
 // ================================================================
 // EXPORTAR RESULTADOS — texto estructurado descargable
@@ -3572,18 +3580,6 @@ function showTip(id, msg) {
 }
 
 // Show contextual tips when visiting sections for first time
-var _navTips = nav;
-nav = function(s) {
-  _navTips(s);
-  var tips = {
-    'flashcards': 'Podés crear mazos desde la sección Generar FC o desde cualquier resumen.',
-    'examen-sim': 'Los simulacros quedan guardados. Podés comparar tu progreso entre intentos.',
-    'sesion-rapida': 'La sesión rápida analiza tu historial real para elegir qué practicar.',
-    'inversa': 'Explicar con tus palabras es una de las técnicas de estudio más efectivas.',
-    'habitos': 'El Pomodoro registra automáticamente el tiempo y lo suma a las estadísticas.',
-  };
-  if (tips[s]) showTip(s, tips[s]);
-};
 
 
 // ================================================================
@@ -3764,17 +3760,6 @@ openMat = function(mat) {
 };
 
 // Patch initChatMats / renderMaterias to also init recientes display
-var _navMateria = nav;
-nav = function(s) {
-  _navMateria(s);
-  if (s === 'materias') {
-    setTimeout(renderMatRecientes, 50);
-    setTimeout(function(){
-      var inp = document.getElementById('mat-search-global');
-      if (inp) inp.focus();
-    }, 150);
-  }
-};
 
 // CSS for hover state on search results
 (function addMatCSS(){
@@ -3817,19 +3802,6 @@ var _secMap = {
   prog: ['progreso','estadisticas','metas','habitos','notificaciones','favoritos','perfil']
 };
 
-var _navSbExpand = nav;
-nav = function(s) {
-  _navSbExpand(s);
-  Object.keys(_secMap).forEach(function(sec) {
-    if (_secMap[sec].indexOf(s) !== -1 && !_sbState[sec]) {
-      _sbState[sec] = true;
-      var el = document.getElementById('sb-' + sec);
-      var ico = document.getElementById('sb-' + sec + '-ico');
-      if (el) el.style.display = 'block';
-      if (ico) ico.textContent = '▾';
-    }
-  });
-};
 
 
 // ================================================================
@@ -3915,16 +3887,6 @@ document.addEventListener('click', function(e) {
 });
 
 // Focus input when opening materia screen
-var _navFocusMat = nav;
-nav = function(s) {
-  _navFocusMat(s);
-  if (s === 'materia') {
-    setTimeout(function() {
-      var inp = document.getElementById('mat-in');
-      if (inp) { inp.value = ''; inp.focus(); }
-    }, 120);
-  }
-};
 
 
 // ================================================================
@@ -4015,11 +3977,6 @@ function mostrarInstrucciones() {
 }
 
 // Patch nav to update supa status when entering perfil
-var _navSupa = nav;
-nav = function(s) {
-  _navSupa(s);
-  if (s === 'perfil') setTimeout(actualizarStatusSupa, 60);
-};
 
 // On startup — if already configured and no session, show login automatically
 // (only if user didn't dismiss it this session)
@@ -4045,9 +4002,9 @@ usarSinCuenta = function() {
 // SUPABASE CONFIG — reemplazá estos valores con los tuyos
 // Obtenelos en: supabase.com → tu proyecto → Settings → API
 // ============================================================
-var SUPA_URL = ''; // ej: https://abcxyz.supabase.co
-var SUPA_KEY = ''; // anon/public key
-var SUPA_TABLE = localStorage.getItem('sn_supa_table') || 'userdata';
+var SUPA_URL = 'https://baczpneljvpakxjuximx.supabase.co'; // ej: https://abcxyz.supabase.co
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhY3pwbmVsanZwYWt4anV4aW14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNjk5OTcsImV4cCI6MjEwMjc0NTk5N30.UJVZvXEra8sg0uIhrcoYQpFh7k2mjqP7px_w-e-i1Tw'; // anon/public key
+var SUPA_TABLE = localStorage.getItem('sn_supa_table') || 'userdata'; // default table
 var _supa = null;
 var _supaUser = null;
 
