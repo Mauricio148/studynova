@@ -250,7 +250,7 @@ body.dark input,body.dark textarea,body.dark select{background:#232330;color:#f0
       <div class="si" onclick="nav('comparador')">⚖️ Comparar</div>
       <div class="si" onclick="nav('tp')">📄 Trabajo práctico</div>
       <div class="si" onclick="nav('rubrica')">📋 Rúbricas</div>
-      <div class="si" onclick="nav('consigna')">📌 Consignas</div>
+      <div class="si" onclick="nav('rubrica')">📌 Consignas</div>
       <div class="si" onclick="nav('otra-manera')">🔄 Otra explicación</div>
       <div class="si" onclick="nav('inversa')">🔄 Explicación inversa</div>
       <div class="si" onclick="nav('ejemplos')">💡 Ejemplos prácticos</div>
@@ -1475,7 +1475,7 @@ function nav(s) {
   if (s === 'inversa') { /* user inputs explanation */ }
   if (s === 'ejemplos') { /* user inputs concept */ }
   if (s === 'programa') { /* user inputs program */ }
-  if (s === 'consigna') { /* user inputs consigna */ }
+  if (s === 'consigna') { s = 'rubrica'; }  // consigna is inside rubrica screen
 
   // Tips
   var _tips = {
@@ -1531,10 +1531,15 @@ function buildTree(grupos) {
 // ================================================================
 // API
 // ================================================================
+// ================================================================
+// PROXY URL — reemplazá con tu Worker URL de Cloudflare
+// ================================================================
+var PROXY_URL = 'https://studynova-proxy.TU-USUARIO.workers.dev';
+
 async function ai(messages, system, max) {
   var body = {model:'claude-sonnet-4-6', max_tokens: max||1000, messages: messages};
   if (system) body.system = system;
-  var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  var r = await fetch(PROXY_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   var d = await r.json();
   if (d.error) throw new Error(d.error.message);
   return d.content.map(function(b) { return b.text||''; }).join('');
@@ -1544,7 +1549,7 @@ async function aiVision(imgBase64, mediaType, prompt, max) {
     {type:'image', source:{type:'base64', media_type: mediaType, data: imgBase64}},
     {type:'text', text: prompt}
   ]}]};
-  var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  var r = await fetch(PROXY_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   var d = await r.json();
   if (d.error) throw new Error(d.error.message);
   return d.content.map(function(b) { return b.text||''; }).join('');
