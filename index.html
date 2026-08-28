@@ -36,12 +36,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 
 /* MAIN */
-.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 .top{padding:10px 18px;background:var(--s);border-bottom:.5px solid var(--bo);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px}
 .pt{font-size:15px;font-weight:700}
 .ps{font-size:11px;color:var(--th);margin-top:1px}
 .bdg{padding:3px 9px;background:var(--pl);color:var(--pd);border-radius:20px;font-size:11px;font-weight:600}
-.con{padding:14px 18px;flex:1;overflow-y:auto}
+.con{padding:14px 18px;flex:1;overflow-y:auto;min-height:0}
 
 /* UTILS */
 .card{background:var(--s);border:.5px solid var(--bo);border-radius:var(--radl)}
@@ -54,7 +54,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 input,textarea,select{font-family:inherit;font-size:13px;color:var(--tx);background:var(--bg);border:.5px solid var(--bs);border-radius:8px;padding:7px 10px;outline:none;transition:border-color .1s;width:100%}
 input:focus,textarea:focus,select:focus{border-color:var(--p)}
 textarea{resize:vertical}
-.scr{display:none;flex-direction:column;height:100%;overflow:hidden}
+.scr{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .scr.act{display:flex}
 .pgreen{background:var(--gl);color:var(--g);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
 .chips{display:flex;gap:5px;flex-wrap:wrap}
