@@ -1534,7 +1534,7 @@ function buildTree(grupos) {
 // ================================================================
 // PROXY URL — reemplazá con tu Worker URL de Cloudflare
 // ================================================================
-var PROXY_URL = 'https://studynova-proxy.maurooarias800.workers.dev';
+var PROXY_URL = 'https://studynova-proxy.TU-USUARIO.workers.dev';
 
 async function ai(messages, system, max) {
   // Build Gemini-compatible request
@@ -3034,14 +3034,16 @@ function simSet(k,v,btn){simS[k]=v;if(btn){btn.parentElement.querySelectorAll('.
 async function iniciarSimulacro(){
   var mat=document.getElementById('sim-mat').value,temas=document.getElementById('sim-temas').value.trim(),dif=document.getElementById('sim-dif').value,tipo=document.getElementById('sim-tipo').value,tiempo=parseInt(document.getElementById('sim-tiempo').value)||60;
   var area=document.getElementById('sim-area');
-  area.innerHTML=ldg('Generando simulacro completo de '+mat+'...');
-  var prompt='Generá exactamente '+simS.qty+' preguntas de opción múltiple para un simulacro de '+mat+(temas?', temas: '+temas:'')+'. Dificultad: '+dif+'. Respondé SOLO con JSON: {"preguntas":[{"pregunta":"texto","opciones":["A) opt","B) opt","C) opt","D) opt"],"correcta":0,"explicacion":"breve","tema":"tema de la pregunta","dificultad":"básica/intermedia/avanzada"}]} Solo JSON válido.';
+  // Limit to max 10 questions per request to avoid timeout
+  var qty = Math.min(simS.qty, 10);
+  area.innerHTML=ldg('Generando simulacro de '+mat+' ('+qty+' preguntas)...');
+  var prompt='Generá exactamente '+qty+' preguntas de opción múltiple para un simulacro de '+mat+(temas?', temas: '+temas:'')+'. Dificultad: '+dif+'. Respondé SOLO con JSON: {"preguntas":[{"pregunta":"texto","opciones":["A) opt","B) opt","C) opt","D) opt"],"correcta":0,"explicacion":"breve","tema":"tema","dificultad":"básica/intermedia/avanzada"}]} Solo JSON válido.';
   try{
-    var raw=await ai([{role:'user',content:prompt}],null,2500);
+    var raw=await ai([{role:'user',content:prompt}],null,2000);
     var p=pj(raw);
     simS.qs=p.preguntas;simS.cur=0;simS.score=0;simS.errores=[];simS.tiempos=[];simS.tInicio=Date.now();
     renderSimQ(tiempo);
-  }catch(e){area.innerHTML='<div class="eb">Error al generar. Intentá de nuevo.</div>';}
+  }catch(e){area.innerHTML='<div class="eb">Error al generar. La IA tardó demasiado — intentá con menos preguntas o un tema más específico.<br><small>'+esc(e.message)+'</small></div>';}
 }
 function renderSimQ(tiempoTotal){
   if(simS.cur>=simS.qs.length){finSimulacro(tiempoTotal);return;}
