@@ -3035,11 +3035,11 @@ async function iniciarSimulacro(){
   var mat=document.getElementById('sim-mat').value,temas=document.getElementById('sim-temas').value.trim(),dif=document.getElementById('sim-dif').value,tipo=document.getElementById('sim-tipo').value,tiempo=parseInt(document.getElementById('sim-tiempo').value)||60;
   var area=document.getElementById('sim-area');
   // Limit to max 10 questions per request to avoid timeout
-  var qty = Math.min(simS.qty, 10);
+  var qty = Math.min(simS.qty, 5);
   area.innerHTML=ldg('Generando simulacro de '+mat+' ('+qty+' preguntas)...');
-  var prompt='Generá exactamente '+qty+' preguntas de opción múltiple para un simulacro de '+mat+(temas?', temas: '+temas:'')+'. Dificultad: '+dif+'. Respondé SOLO con JSON: {"preguntas":[{"pregunta":"texto","opciones":["A) opt","B) opt","C) opt","D) opt"],"correcta":0,"explicacion":"breve","tema":"tema","dificultad":"básica/intermedia/avanzada"}]} Solo JSON válido.';
+  var prompt='Generá exactamente '+qty+' preguntas cortas de opción múltiple de '+mat+(temas?', sobre: '+temas:'')+'. Dificultad: '+dif+'. JSON: {"preguntas":[{"pregunta":"texto","opciones":["A) op","B) op","C) op","D) op"],"correcta":0,"explicacion":"breve","tema":"tema","dificultad":"media"}]} Solo JSON.';
   try{
-    var raw=await ai([{role:'user',content:prompt}],null,2000);
+    var raw=await ai([{role:'user',content:prompt}],null,1500);
     var p=pj(raw);
     simS.qs=p.preguntas;simS.cur=0;simS.score=0;simS.errores=[];simS.tiempos=[];simS.tInicio=Date.now();
     renderSimQ(tiempo);
