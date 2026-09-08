@@ -232,7 +232,6 @@ body.dark input,body.dark textarea,body.dark select{background:#232330;color:#f0
       <div class="si" onclick="nav('examen')">🎯 Modo examen</div>
       <div class="si" onclick="nav('examen-sim')">🧪 Simulacro</div>
       <div class="si" onclick="nav('revision-examen')">🔭 Revisión pre-examen</div>
-      <div class="si" onclick="nav('planificador')">🗓️ Planificador</div>
       <div class="si" onclick="nav('historial')">🕐 Historial</div>
       <div class="si" onclick="nav('calendario')">📅 Calendario</div>
     </div>
@@ -503,163 +502,100 @@ body.dark input,body.dark textarea,body.dark select{background:#232330;color:#f0
 
 <!-- CALENDARIO -->
 <div id="s-calendario" class="scr">
-  <div class="top"><div><div class="pt">📅 Calendario académico</div><div class="ps">Exámenes, entregas y recordatorios</div></div><button class="btn btp bts" onclick="nuevoEvento()">+ Nuevo evento</button></div>
-  <div class="con">
-    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px">
-      <div class="card" style="padding:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <button class="btn btg bts" onclick="calNav(-1)">←</button>
-          <div style="font-size:14px;font-weight:600" id="cal-mes-lbl"></div>
-          <button class="btn btg bts" onclick="calNav(1)">→</button>
-        </div>
-        <div class="cal-grid" style="margin-bottom:4px">
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">L</div>
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">M</div>
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">X</div>
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">J</div>
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">V</div>
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">S</div>
-          <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">D</div>
-        </div>
-        <div class="cal-grid" id="cal-days"></div>
-      </div>
-      <div>
-        <div class="lbl">Próximos eventos</div>
-        <div id="cal-eventos"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FLASHCARDS -->
-<div id="s-flashcards" class="scr">
   <div class="top">
-    <div><div class="pt">🃏 Flashcards</div><div class="ps">Repetición espaciada · todas las materias</div></div>
-    <div style="display:flex;gap:7px"><button class="btn btg bts" onclick="toggleNewFC()">+ Nueva</button><button class="btn btg bts" onclick="nav('genfc')">✨ Generar</button></div>
+    <div><div class="pt">📅 Calendario &amp; Planificador</div><div class="ps">Tocá una fecha para agregar eventos o generar un plan con IA</div></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn btg bts" onclick="calPrev()">← Anterior</button>
+      <button class="btn btg bts" onclick="calHoy()">Hoy</button>
+      <button class="btn btg bts" onclick="calNext()">Siguiente →</button>
+    </div>
   </div>
-  <div class="con" style="overflow:hidden;display:flex;flex-direction:column">
-    <div class="fcl">
-      <div style="overflow-y:auto">
-        <div class="lbl">Mis mazos</div>
-        <div id="mazos-list"></div>
-        <div style="margin-top:8px"><div class="lbl">Nuevo mazo</div>
-          <div style="display:flex;gap:6px"><input type="text" id="nmi" placeholder="Nombre..."/><button class="btn btp" style="padding:6px 10px" onclick="crearMazo()">+</button></div>
-        </div>
+  <div class="con" style="display:grid;grid-template-columns:1fr 320px;gap:16px;overflow:hidden">
+
+    <!-- IZQUIERDA: Calendario -->
+    <div style="display:flex;flex-direction:column;min-height:0">
+      <div style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--p)" id="cal-titulo"></div>
+
+      <!-- Dias semana header -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px">
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">DOM</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">LUN</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">MAR</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">MIE</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">JUE</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">VIE</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--th)">SAB</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:9px;overflow-y:auto">
-        <div id="nfc-panel" style="display:none">
-          <div class="lbl">Nueva flashcard</div>
-          <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:7px">
-            <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Pregunta</div><textarea id="fc-q" rows="2" placeholder="¿Qué querés repasar?"></textarea></div>
-            <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Respuesta</div><textarea id="fc-a" rows="2" placeholder="Respuesta..."></textarea></div>
-            <div style="display:flex;gap:6px"><select id="fc-maz" style="flex:1"></select><button class="btn btp bts" onclick="guardarFC()">Guardar</button><button class="btn btg bts" onclick="toggleNewFC()">Cancelar</button></div>
+
+      <!-- Grilla del mes -->
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;flex:1"></div>
+
+      <!-- Proximos eventos -->
+      <div style="margin-top:14px">
+        <div class="lbl">Proximos eventos</div>
+        <div id="cal-proximos" style="max-height:140px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- DERECHA: Panel fecha + planificador IA -->
+    <div style="display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+
+      <!-- Panel fecha seleccionada -->
+      <div class="card" style="padding:14px">
+        <div id="cal-fecha-sel" style="font-size:13px;font-weight:700;color:var(--p);margin-bottom:10px">Selecciona una fecha</div>
+
+        <!-- Agregar evento -->
+        <div style="font-size:11px;color:var(--th);font-weight:700;text-transform:uppercase;margin-bottom:6px">Agregar evento</div>
+        <input type="text" id="cal-ev-titulo" placeholder="Titulo del evento..." style="margin-bottom:6px"/>
+        <select id="cal-ev-tipo" style="margin-bottom:6px">
+          <option value="examen">Examen</option>
+          <option value="entrega">Entrega / TP</option>
+          <option value="recordatorio">Recordatorio</option>
+          <option value="clase">Clase especial</option>
+        </select>
+        <input type="text" id="cal-ev-mat" placeholder="Materia (opcional)" style="margin-bottom:8px"/>
+        <button class="btn btp bts" style="width:100%" onclick="calAgregarEvento()">+ Agregar al calendario</button>
+
+        <!-- Eventos del dia seleccionado -->
+        <div id="cal-dia-eventos" style="margin-top:10px"></div>
+      </div>
+
+      <!-- Planificador IA -->
+      <div class="card" style="padding:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:10px">🤖 Generar plan de estudio con IA</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div>
+            <div style="font-size:11px;color:var(--th);margin-bottom:3px">Materia</div>
+            <input type="text" id="pl-mat" placeholder="Ej: Matematica"/>
           </div>
-        </div>
-        <div id="fc-con"><div style="text-align:center;padding:40px 20px;color:var(--th)"><div style="font-size:38px;margin-bottom:11px">🃏</div><div style="font-size:13px">Seleccioná un mazo</div></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- APUNTES -->
-<div id="s-apuntes" class="scr">
-  <div class="top"><div><div class="pt">📝 Biblioteca de apuntes</div><div class="ps">Notas, PDFs e imágenes organizados por materia</div></div><div style="display:flex;gap:7px"><button class="btn btg bts" onclick="document.getElementById('pdf-input').click()">📎 Subir PDF</button><input type="file" id="pdf-input" accept=".pdf,.txt" style="display:none" onchange="handlePdfUpload(event)"/><button class="btn btp bts" onclick="nuevoAp()">+ Nuevo</button></div></div>
-  <div class="con" style="overflow:hidden;display:flex;flex-direction:column">
-    <div style="display:grid;grid-template-columns:230px 1fr;gap:13px;flex:1;min-height:0;overflow:hidden">
-      <div style="overflow-y:auto"><div id="ap-list"></div></div>
-      <div class="card" style="display:flex;flex-direction:column;overflow:hidden">
-        <div id="ap-empty" style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--th)"><div style="font-size:34px">📝</div><div style="font-size:13px">Seleccioná, creá o subí un PDF</div></div>
-        <div id="ap-form" style="display:none;flex:1;flex-direction:column;overflow:hidden">
-          <div style="padding:9px 13px;border-bottom:.5px solid var(--bo);display:flex;gap:6px;align-items:center;flex-shrink:0">
-            <input type="text" id="ap-tit" placeholder="Título..." style="flex:1;border:none;background:transparent;padding:0;font-size:14px;font-weight:600"/>
-            <select id="ap-mat" style="width:auto;min-width:110px"></select>
-            <button class="btn btp bts" onclick="guardarAp()">Guardar</button>
-            <button class="btn btg bts" style="color:var(--r)" onclick="borrarAp()">✕</button>
+          <div>
+            <div style="font-size:11px;color:var(--th);margin-bottom:3px">Fecha del examen</div>
+            <input type="date" id="pl-fecha"/>
           </div>
-          <div style="padding:9px 13px;border-bottom:.5px solid var(--bo);display:flex;gap:6px;flex-shrink:0">
-            <button class="btn btg bts" onclick="iaResumirApunte()">✨ Resumir con IA</button>
-            <button class="btn btg bts" onclick="iaPreguntasApunte()">❓ Generar preguntas</button>
-            <button class="btn btg bts" onclick="iaFlashcardsApunte()">🃏 Crear flashcards</button>
+          <div>
+            <div style="font-size:11px;color:var(--th);margin-bottom:3px">Horas disponibles por dia</div>
+            <input type="number" id="pl-hrs" value="2" min="1" max="10"/>
           </div>
-          <div style="padding:13px;flex:1;overflow-y:auto"><textarea id="ap-body" placeholder="Escribí tus apuntes..." style="border:none;background:transparent;font-size:13px;line-height:1.75;min-height:260px"></textarea></div>
+          <div>
+            <div style="font-size:11px;color:var(--th);margin-bottom:3px">Temas a estudiar</div>
+            <textarea id="pl-temas" rows="3" placeholder="Ej: derivadas, integrales..."></textarea>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px">
+            <input type="checkbox" id="pl-cal" checked style="width:auto"> Agregar examen al calendario
+          </label>
+          <button class="btn btp" onclick="generarPlan()" style="padding:10px">Generar cronograma</button>
+        </div>
+        <div id="pl-out" style="margin-top:10px"></div>
+        <div id="pl-export-btn" style="display:none;margin-top:7px">
+          <button class="btn btg bts" onclick="exportarPlanEstudio()">Exportar plan</button>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
-<!-- ASISTENTE IA -->
-<div id="s-asistente" class="scr">
-  <div class="top"><div><div class="pt">🤖 Asistente IA — Tutor personal</div><div class="ps">Chat libre, modo profesor y práctica oral</div></div><button class="btn btg bts" onclick="limpiarChat()">Limpiar</button></div>
-  <div style="display:flex;flex:1;overflow:hidden">
-    <div style="width:165px;border-right:.5px solid var(--bo);padding:9px;overflow-y:auto;background:var(--s);flex-shrink:0">
-      <div class="lbl">Modo</div>
-      <div onclick="setChatModo('chat')" id="modo-chat" class="si act" style="margin-bottom:8px">💬 Chat libre</div>
-      <div onclick="setChatModo('profesor')" id="modo-profesor" class="si" style="margin-bottom:8px">🎓 Modo profesor</div>
-      <div onclick="setChatModo('oral')" id="modo-oral" class="si" style="margin-bottom:8px">🎤 Examen oral</div>
-      <div class="lbl">Materia</div><div id="chat-mats"></div>
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-      <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:14px">
-        <div id="chat-wel" style="text-align:center;padding:38px 20px;color:var(--th)">
-          <div style="font-size:34px;margin-bottom:9px">🤖</div>
-          <div style="font-size:13px;font-weight:500;color:var(--tm)">Hola, soy tu tutor personal</div>
-          <div style="font-size:11px;margin-top:5px">Elegí una materia y un modo para empezar</div>
-          <div class="chips" style="justify-content:center;margin-top:12px" id="chat-sugs"></div>
-        </div>
-      </div>
-      <div style="padding:11px 14px;border-top:.5px solid var(--bo);background:var(--s);flex-shrink:0;display:flex;gap:7px">
-        <input type="text" id="chat-in" placeholder="Escribí tu pregunta o respuesta..." style="flex:1"/>
-        <button class="btn btp" onclick="enviarChat()">Enviar</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- EXAMEN -->
-<div id="s-examen" class="scr">
-  <div class="top"><div><div class="pt">🎯 Modo examen</div><div class="ps">Parciales, finales simulados y preguntas adaptativas</div></div><span class="bdg">Con IA</span></div>
-  <div class="con">
-    <div style="display:grid;grid-template-columns:275px 1fr;gap:18px">
-      <div><div class="lbl">Configuración</div>
-        <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px">
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Materia</div><select id="ex-mat"><option>Matemática</option><option>Física</option><option>Química</option><option>Biología</option><option>Historia</option><option>Lengua</option><option>Inglés</option><option>Programación</option><option>Economía</option><option>Psicología</option><option>Medicina</option><option>Derecho</option></select></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Tema</div><input type="text" id="ex-tema" placeholder="Ej: derivadas... (vacío = todo el temario)"/></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Tipo de examen</div><select id="ex-tipo"><option value="rapido">Práctica rápida (opción múltiple)</option><option value="parcial">Parcial simulado</option><option value="final">Final simulado</option><option value="abierto">Preguntas abiertas (corrige IA)</option></select></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Preguntas</div>
-            <div style="display:flex;gap:5px"><button class="chip ex-qty" onclick="exSet('qty',5,this)">5</button><button class="chip ex-qty" style="background:var(--p);color:#fff" onclick="exSet('qty',10,this)">10</button><button class="chip ex-qty" onclick="exSet('qty',15,this)">15</button></div></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Tiempo/pregunta</div>
-            <div style="display:flex;gap:5px"><button class="chip ex-time" onclick="exSet('time',30,this)">30s</button><button class="chip ex-time" style="background:var(--p);color:#fff" onclick="exSet('time',60,this)">60s</button><button class="chip ex-time" onclick="exSet('time',90,this)">90s</button></div></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Dificultad</div><select id="ex-dif"><option value="básica">Básica</option><option value="intermedia" selected>Intermedia</option><option value="avanzada">Avanzada</option></select></div>
-          <button class="btn btp" style="padding:10px" onclick="iniciarExamen()">🚀 Comenzar</button>
-        </div>
-      </div>
-      <div id="ex-area"><div style="text-align:center;padding:60px 20px;color:var(--th)"><div style="font-size:46px;margin-bottom:13px">🎯</div><div style="font-size:13px;font-weight:500;color:var(--tm)">Configurá y comenzá</div></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- PLANIFICADOR -->
-<div id="s-planificador" class="scr">
-  <div class="top"><div><div class="pt">🗓️ Planificador IA</div><div class="ps">Cronograma personalizado para tu examen</div></div><span class="bdg">Con IA</span></div>
-  <div class="con">
-    <div style="display:grid;grid-template-columns:285px 1fr;gap:18px">
-      <div><div class="lbl">Configurar plan</div>
-        <div class="card" style="padding:13px;display:flex;flex-direction:column;gap:9px">
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Materia</div><input type="text" id="pl-mat" placeholder="Ej: Cálculo, Historia..."/></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Fecha del examen</div><input type="date" id="pl-fecha"/></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Horas por día</div><select id="pl-hrs"><option value="1">1 hora</option><option value="2" selected>2 horas</option><option value="3">3 horas</option><option value="4">4+ horas</option></select></div>
-          <div><div style="font-size:11px;color:var(--tm);margin-bottom:3px">Temas pendientes</div><textarea id="pl-temas" rows="5" placeholder="- Derivadas&#10;- Integrales&#10;- Límites"></textarea></div>
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="pl-cal" style="width:auto" checked> Agregar al calendario</label>
-          <button class="btn btp" style="padding:10px" onclick="generarPlan()">🗓️ Generar cronograma</button>
-        </div>
-      </div>
-      <div id="pl-out"><div style="text-align:center;padding:60px 20px;color:var(--th)"><div style="font-size:44px;margin-bottom:13px">🗓️</div><div style="font-size:14px;font-weight:500;color:var(--tm)">Completá el formulario y generá tu plan</div></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- EJERCICIOS -->
 <div id="s-ejercicios" class="scr">
   <div class="top"><div><div class="pt">🎲 Generador de ejercicios</div><div class="ps">Ejercicios personalizados con soluciones</div></div><span class="bdg">Con IA</span></div>
   <div class="con">
@@ -1459,6 +1395,7 @@ function nav(s) {
   if (s === 'notificaciones') { try { generarNotifs(); } catch(e) {} }
   if (s === 'favoritos') { try { renderFavoritos(); } catch(e) {} }
   if (s === 'genfc') { try { var gm = document.getElementById('gf-maz'); if (gm) gm.innerHTML = DB.mazos.map(function(m) { return '<option value="' + m.id + '">' + esc(m.nombre) + '</option>'; }).join(''); } catch(e) {} }
+  if (s === 'planificador') { s = 'calendario'; }
   if (s === 'calendario') { try { renderCal(); } catch(e) {} }
   if (s === 'materias') { try { renderMateriasGrid(); renderMatRecientes(); setTimeout(function(){ var inp=document.getElementById('mat-search-global'); if(inp)inp.focus(); },150); } catch(e) {} }
   if (s === 'perfil') { try { loadProfile(); actualizarStatusSupa(); } catch(e) {} }
@@ -4410,6 +4347,158 @@ document.addEventListener('click', function(e) {
   if (e.target.classList.contains('auth-local-lnk')) usarSinCuenta();
   if (e.target.classList.contains('auth-setup-back')) { var ov=document.getElementById('auth-overlay'); if(ov) ov.innerHTML=authHTML(); }
 });
+
+
+// ================================================================
+// CALENDARIO UNIFICADO
+// ================================================================
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();
+var calSelDate = null; // 'YYYY-MM-DD'
+
+function calHoy() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); renderCal(); }
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
+function calVista(v) { renderCal(); }
+
+function renderCal() {
+  var tEl = document.getElementById('cal-titulo');
+  if (tEl) tEl.textContent = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][calMonth] + ' ' + calYear;
+
+  var grid = document.getElementById('cal-grid');
+  if (!grid) return;
+
+  var first = new Date(calYear, calMonth, 1).getDay();
+  var days = new Date(calYear, calMonth+1, 0).getDate();
+  var today = new Date();
+  var todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+
+  var cells = '';
+  // Empty cells before first day
+  for (var i=0; i<first; i++) {
+    cells += '<div style="min-height:52px"></div>';
+  }
+
+  for (var d=1; d<=days; d++) {
+    var dateStr = calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var evs = (DB.eventos||[]).filter(function(e){return e.fecha===dateStr;});
+    var isToday = dateStr===todayStr;
+    var isSel = dateStr===calSelDate;
+    var hasExam = evs.some(function(e){return e.tipo==='examen';});
+    var hasOther = evs.some(function(e){return e.tipo!=='examen';});
+
+    var bg = isSel ? 'var(--p)' : isToday ? 'var(--pl)' : 'var(--bg)';
+    var col = isSel ? '#fff' : isToday ? 'var(--pd)' : 'var(--tx)';
+    var border = isSel ? 'var(--p)' : isToday ? 'var(--p)' : 'var(--bo)';
+
+    var dots = '';
+    if (hasExam) dots += '<div style="width:6px;height:6px;border-radius:50%;background:var(--r);display:inline-block;margin:0 1px"></div>';
+    if (hasOther) dots += '<div style="width:6px;height:6px;border-radius:50%;background:var(--t);display:inline-block;margin:0 1px"></div>';
+
+    cells += '<div class="cal-day" data-date="'+dateStr+'" style="min-height:52px;padding:5px;border-radius:8px;border:.5px solid '+border+';background:'+bg+';cursor:pointer;transition:background .1s">';
+      + '<div style="font-size:13px;font-weight:'+(isToday||isSel?'700':'400')+';color:'+col+';margin-bottom:3px">'+d+'</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:1px">'+dots+'</div>'
+      + '</div>';
+  }
+
+  grid.innerHTML = cells;
+  renderCalProximos();
+  if (calSelDate) calSelectDay(calSelDate);
+}
+
+function calSelectDay(dateStr) {
+  calSelDate = dateStr;
+  renderCal();
+
+  var d = new Date(dateStr+'T12:00:00');
+  var dias = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+  var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var label = dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' '+d.getFullYear();
+
+  var selEl = document.getElementById('cal-fecha-sel');
+  if (selEl) selEl.textContent = label;
+
+  // Pre-fill planificador date
+  var plFecha = document.getElementById('pl-fecha');
+  if (plFecha && !plFecha.value) plFecha.value = dateStr;
+
+  // Show events for this day
+  var evs = (DB.eventos||[]).filter(function(e){return e.fecha===dateStr;});
+  var evEl = document.getElementById('cal-dia-eventos');
+  if (!evEl) return;
+
+  if (!evs.length) {
+    evEl.innerHTML = '<div style="font-size:11px;color:var(--th);padding:6px 0">Sin eventos este dia</div>';
+    return;
+  }
+
+  var tipoIco = {examen:'📝',entrega:'📤',recordatorio:'🔔',clase:'📚'};
+  evEl.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;margin-bottom:6px">Eventos del dia</div>'
+    + evs.map(function(ev,i) {
+      return '<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:.5px solid var(--bo)">'
+        +'<span style="font-size:14px">'+(tipoIco[ev.tipo]||'📌')+'</span>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:500">'+esc(ev.titulo)+'</div>'
+        +(ev.materia?'<div style="font-size:10px;color:var(--th)">'+esc(ev.materia)+'</div>':'')+'</div>'
+        +'<button onclick="calBorrarEv('+ev.id+')" style="background:none;border:none;color:var(--r);cursor:pointer;font-size:14px;padding:2px">×</button>'
+        +'</div>';
+    }).join('');
+}
+
+function calAgregarEvento() {
+  if (!calSelDate) { alert('Selecciona una fecha primero.'); return; }
+  var titulo = document.getElementById('cal-ev-titulo').value.trim();
+  if (!titulo) { alert('Escribi el titulo del evento.'); return; }
+  var tipo = document.getElementById('cal-ev-tipo').value;
+  var mat = document.getElementById('cal-ev-mat').value.trim();
+
+  DB.eventos.push({
+    id: Date.now(),
+    titulo: titulo,
+    fecha: calSelDate,
+    tipo: tipo,
+    materia: mat
+  });
+  saveDB();
+
+  document.getElementById('cal-ev-titulo').value = '';
+  document.getElementById('cal-ev-mat').value = '';
+
+  calSelectDay(calSelDate);
+  renderCal();
+  showToast('✓ Evento agregado');
+}
+
+function calBorrarEv(id) {
+  DB.eventos = DB.eventos.filter(function(e){return e.id!==id;});
+  saveDB();
+  calSelectDay(calSelDate);
+  renderCal();
+}
+
+function renderCalProximos() {
+  var el = document.getElementById('cal-proximos'); if (!el) return;
+  var now = new Date();
+  var evs = (DB.eventos||[])
+    .filter(function(e){ return new Date(e.fecha+'T12:00:00') >= now; })
+    .sort(function(a,b){ return new Date(a.fecha) - new Date(b.fecha); })
+    .slice(0, 8);
+
+  if (!evs.length) { el.innerHTML = '<div style="font-size:11px;color:var(--th);padding:8px 0">Sin eventos proximos</div>'; return; }
+
+  var tipoIco = {examen:'📝',entrega:'📤',recordatorio:'🔔',clase:'📚'};
+  var tipoCol = {examen:'var(--r)',entrega:'var(--a)',recordatorio:'var(--t)',clase:'var(--p)'};
+
+  el.innerHTML = evs.map(function(ev) {
+    var dias = Math.round((new Date(ev.fecha+'T12:00:00')-now)/(1000*60*60*24));
+    var col = tipoCol[ev.tipo]||'var(--p)';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--bo);cursor:pointer" class="cal-prox-item" data-fecha="'+ev.fecha+'">'
+      +'<span style="font-size:15px">'+(tipoIco[ev.tipo]||'📌')+'</span>'
+      +'<div style="flex:1"><div style="font-size:12px;font-weight:500">'+esc(ev.titulo)+'</div>'
+      +(ev.materia?'<div style="font-size:10px;color:var(--th)">'+esc(ev.materia)+'</div>':'')+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:'+col+'">'+dias+'d</div>'
+      +'</div>';
+  }).join('');
+}
 
 // ================================================================
 // INIT
